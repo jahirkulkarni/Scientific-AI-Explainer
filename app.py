@@ -2,6 +2,7 @@ from model import get_explanation
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
+search_history = []  
 
 
 users_db = {}
@@ -31,23 +32,20 @@ def login():
             return "<h1>Wrong Details!</h1> <a href='/login'>Try Again</a>"
     return render_template('login.html')
 
+
 @app.route('/search', methods=['GET', 'POST'])
 def search():
+    explanation = None
     if request.method == 'POST':
-        term = request.form.get('term', '').strip()
+        term = request.form.get('term') # User ne jo word dala
         
-        
-        
-        if not term.replace(" ", "").isalpha():
-            error_msg = "Error: Please enter only scientific words (A-Z). Numbers are not allowed."
-            return render_template('search.html', term=term, explanation=error_msg)
-        
-       
-        explanation = get_explanation(term)
-        return render_template('search.html', term=term, explanation=explanation)
-    
-    return render_template('search.html')
+        # --- YE NAYA HISSA HAI ---
+        if term: 
+            # Word ko list mein sabse upar add karein
+            search_history.insert(0, term) 
+        # -------------------------
 
-if __name__ == '__main__':
- 
-    app.run(debug=True, port=8080)
+        explanation = get_ai_explanation(term) # Aapka AI model function
+    
+    # Ab 'history' ko frontend (HTML) par bhej rahe hain
+    return render_template('search.html', explanation=explanation, history=search_history)
