@@ -3,63 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
+    <title>Scientific AI | Team C</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* Body design: Page ke beech mein laane ke liye */
+        :root {
+            --primary: #4facfe;
+            --secondary: #00f2fe;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: #f1f5f9;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Layout --- */
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- Sidebar History --- */
+        .sidebar {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: var(--glass);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 5px;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            padding: 20px;
         }
-        /* Card design: Form ka box */
+
         .container {
-            background: white;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
             padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 350px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
             text-align: center;
+            border: 1px solid var(--glass-border);
         }
-        h2 { color: #333; margin-bottom: 20px; }
-        /* Input fields design */
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
+
+        h1 {
+            font-weight: 600;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
         }
-        /* Button design */
-        button {
+
+        .input-group {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        input[type="text"] {
             width: 100%;
-            padding: 12px;
-            background-color: #764ba2;
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.2);
             color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
             font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
             transition: 0.3s;
         }
-        button:hover { background-color: #667eea; }
-        a { color: #764ba2; text-decoration: none; font-size: 14px; }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(79, 172, 254, 0.3);
+        }
+
+        button.main-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button.main-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+        }
+
+        .clear-history {
+            margin-top: auto;
+            background: transparent;
+            border: 1px solid #ff4d4d;
+            color: #ff4d4d;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .clear-history:hover {
+            background: #ff4d4d;
+            color: white;
+        }
+
+        /* --- Result Box --- */
+        .result-box {
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 18px;
+            text-align: left;
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Loading Spinner --- */
+        .loader {
+            display: none;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            .sidebar { width: 100%; order: 2; border-right: none; border-top: 1px solid var(--glass-border); }
+            .main-content { order: 1; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Login</h2>
-        <form method="POST">
-            <input type="text" name="username" placeholder="Username" required>
+
+<div class="app-container">
+    <aside class="sidebar">
+        <h3>Recent Searches</h3>
+        <div class="history-list" id="historyList">
+            </div>
+        <button class="clear-history" onclick="clearAllHistory()">Clear All History</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>🔬 Scientific AI</h1>
+            <p style="opacity: 0.7;">Decode complex scientific terminology instantly.</p>
             
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p>Don't have an account? <a href="/register">Register here</a></p>
-    </div>
+            <form id="searchForm" onsubmit="handleSearch(event)">
+                <div class="input-group">
+                    <input type="text" id="termInput" placeholder="e.g. Quantum Entanglement..." required>
+                </div>
+                <button type="submit" class="main-btn">Explain Term</button>
+            </form>
+
+            <div id="loader" class="loader"></div>
+
+            <div id="resultContainer">
+                {% if explanation %}
+                <div class="result-box">
+                    <h3 style="margin: 0 0 10px 0; color: var(--primary);">Explanation:</h3>
+                    <p>{{ explanation }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Load history on page start
+    document.addEventListener('DOMContentLoaded', renderHistory);
+
+    function handleSearch(event) {
+        const term = document.getElementById('termInput').value;
+        if (!term) return;
+
+        // Show loader
+        document.getElementById('loader').style.display = 'block';
+
+        // Add to local storage history
+        saveToHistory(term);
+        
+        // Note: The form will still submit to your Flask/Backend 
+        // if you keep the 'action' attribute. For now, this handles the UI.
+    }
+
+    function saveToHistory(term) {
+        let history = JSON.parse(localStorage.getItem('sci_history')) || [];
+        if (!history.includes(term)) {
+            history.unshift(term); // Add to start
+            if (history.length > 10) history.pop(); // Keep last 10
+            localStorage.setItem('sci_history', JSON.stringify(history));
+            renderHistory();
+        }
+    }
+
+    function renderHistory() {
+        const historyList = document.getElementById('historyList');
+        const history = JSON.parse(localStorage.getItem('sci_history')) || [];
+        
+        historyList.innerHTML = history.map((item, index) => `
+            <div class="history-item">
+                <span onclick="document.getElementById('termInput').value='${item}'">${item}</span>
+                <button class="delete-btn" onclick="deleteHistoryItem(${index})">✕</button>
+            </div>
+        `).join('');
+    }
+
+    function deleteHistoryItem(index) {
+        let history = JSON.parse(localStorage.getItem('sci_history')) || [];
+        history.splice(index, 1);
+        localStorage.setItem('sci_history', JSON.stringify(history));
+        renderHistory();
+    }
+
+    function clearAllHistory() {
+        if(confirm("Clear all search history?")) {
+            localStorage.removeItem('sci_history');
+            renderHistory();
+        }
+    }
+</script>
+
 </body>
 </html>
