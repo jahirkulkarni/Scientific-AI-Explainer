@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConceptClarity</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: "Poppins", sans-serif; }
+        body { height:100vh; display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:white; padding: 20px; }
+        .main-container { display: flex; gap: 20px; width: 1100px; max-width: 95%; height: 650px; }
+        .history-sidebar { width: 280px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); overflow-y: auto; }
+        .h-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+        .del-btn { color: #ff4d4d; cursor: pointer; font-weight: bold; }
+        .wrapper { flex: 1; padding:35px; border-radius:20px; background:rgba(255,255,255,0.08); backdrop-filter: blur(12px); box-shadow:0 10px 40px rgba(0,0,0,0.4); overflow-y: auto; }
+        .search-box { display:flex; gap:10px; margin-bottom:25px; background: white; padding: 5px; border-radius: 12px; }
+        .search-box input { flex:1; padding:12px; border:none; outline:none; font-size:15px; color: #333; }
+        .search-box select { border: none; outline: none; padding: 0 10px; cursor: pointer; border-left: 1px solid #ddd; background: white; color: #333; font-weight: 500; }
+        .search-box button { padding:12px 25px; border:none; border-radius:10px; background:linear-gradient(45deg,#00f260,#0575e6); color:white; font-weight:bold; cursor:pointer; }
+        .result-card { background:rgba(255,255,255,0.12); padding:25px; border-radius:15px; display: none; margin-bottom: 15px; }
+        .term { font-size:22px; font-weight:600; margin-bottom:12px; color:#7dd3fc; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .explanation { line-height:1.7; font-size:15px; color:#e5e7eb; margin-bottom: 15px; }
+        .tag { display:inline-block; background:#06b6d4; padding:6px 12px; border-radius:20px; font-size:11px; margin:4px; font-weight: 500; }
+        .debug { background:#020617; color:#22c55e; padding:15px; border-radius:10px; font-family:monospace; font-size:11px; display: none; }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="history-sidebar">
+        <h3 style="margin-bottom: 15px;">Search History</h3>
+        <div id="hList"></div>
+    </div>
+    <div class="wrapper">
+        <h2 style="text-align: center; margin-bottom: 25px;">🔬 ConceptClarity</h2>
+        <div class="search-box">
+            <input type="text" id="termInput" placeholder="Explain a scientific term...">
+            <select id="langSelect">
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Marathi">Marathi</option>
+            </select>
+            <button onclick="handleSearch()" id="btn">Explain</button>
+        </div>
+        <div class="result-card" id="resCard">
+            <div class="term" id="resTerm"></div>
+            <div class="explanation" id="resDesc"></div>
+            <div id="resTags"></div>
+        </div>
+        <div class="debug" id="debugWindow">
+            <div style="color: #7dd3fc; margin-bottom: 5px;">[DEBUG JSON]</div>
+            <pre id="jsonDisplay" style="white-space: pre-wrap;"></pre>
+        </div>
+    </div>
+</div>
+<script>
+    async function handleSearch() {
+        const term = document.getElementById('termInput').value.trim();
+        const lang = document.getElementById('langSelect').value;
+        if(!term) return;
+        document.getElementById('btn').innerText = "...";
+        try {
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ term: term, lang: lang })
+            });
+            const data = await response.json();
+            if (data.status === "success") {
+                document.getElementById('resCard').style.display = 'block';
+                document.getElementById('debugWindow').style.display = 'block';
+                document.getElementById('resTerm').innerText = data.term;
+                document.getElementById('resDesc').innerText = data.explanation;
+                document.getElementById('jsonDisplay').innerText = JSON.stringify(data, null, 2);
+                const tagBox = document.getElementById('resTags');
+                tagBox.innerHTML = '';
+                data.related_terms.forEach(t => { tagBox.innerHTML += `<span class="tag">#${t}</span>`; });
+                updateHistoryUI(data.history);
+            }
+        } catch (err) { alert("Error connecting to server!"); }
+        finally { document.getElementById('btn').innerText = "Explain"; }
+    }
+    function updateHistoryUI(history) {
+        const hList = document.getElementById('hList');
+        hList.innerHTML = history.map(item => `
+            <div class="h-item">
+                <span>${item}</span>
+                <span class="del-btn" onclick="deleteItem('${item}')">✕</span>
+            </div>
+        `).join('');
+    }
+    async function deleteItem(item) {
+        const response = await fetch('/delete_item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item: item })
+        });
+        const data = await response.json();
+        updateHistoryUI(data.history);
+    }
+</script>
+</body>
+</html>
