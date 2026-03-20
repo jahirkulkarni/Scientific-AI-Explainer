@@ -1,83 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ConceptClarity | Module 4</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Terminology Explainer</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; padding: 40px; }
-        .app-card { background: white; width: 480px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); padding: 35px; text-align: center; }
-        input { width: 90%; padding: 15px; border: 2px solid #3498db; border-radius: 8px; margin-bottom: 15px; font-size: 16px; }
-        .btn-explain { background: #00873c; color: white; border: none; width: 100%; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        #resultArea { text-align: left; margin-top: 30px; display: none; }
-        .explanation-text { color: #444; line-height: 1.6; border: 1px solid #eee; padding: 20px; border-radius: 10px; background: #fff; }
-        .tag { background: #006d2c; color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; margin-right: 8px; display: inline-block; margin-top: 8px; font-weight: 500; }
-        #jsonBox { margin-top: 20px; background: #222; color: #0f0; padding: 15px; font-size: 11px; border-radius: 8px; display: none; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: "Poppins", sans-serif; }
+        body { height:100vh; display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:white; padding: 20px; }
+        
+        /* Two Column Layout */
+        .main-container { display: flex; gap: 20px; width: 1000px; max-width: 95%; height: 600px; }
+        
+        /* Left Column: History */
+        .history-sidebar { width: 250px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); overflow-y: auto; }
+        .history-sidebar h3 { font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .h-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+        .del-btn { color: #ff4d4d; cursor: pointer; font-weight: bold; margin-left: 10px; }
+
+        /* Right Column: Search & Results */
+        .wrapper { flex: 1; padding:35px; border-radius:20px; background:rgba(255,255,255,0.08); backdrop-filter: blur(12px); box-shadow:0 10px 40px rgba(0,0,0,0.4); overflow-y: auto; }
+        .title { text-align:center; font-size:30px; margin-bottom:25px; font-weight:600; }
+        .search-box { display:flex; gap:10px; margin-bottom:25px; }
+        .search-box input { flex:1; padding:14px; border:none; border-radius:10px; outline:none; font-size:15px; color: #333; }
+        .search-box button { padding:14px 22px; border:none; border-radius:10px; background:linear-gradient(45deg,#00f260,#0575e6); color:white; font-weight:bold; cursor:pointer; }
+        .result-card { background:rgba(255,255,255,0.12); padding:20px; border-radius:15px; display: none; }
+        .term { font-size:20px; font-weight:600; margin-bottom:10px; color:#7dd3fc; }
+        .explanation { line-height:1.6; font-size:14px; color:#e5e7eb; }
+        .tag { display:inline-block; background:#06b6d4; padding:5px 10px; border-radius:20px; font-size:11px; margin:4px; }
+        .debug { margin-top:20px; background:#020617; color:#22c55e; padding:15px; border-radius:10px; font-family:monospace; font-size:11px; display: none; }
     </style>
 </head>
 <body>
-    <div class="app-card">
-        <h1>ConceptClarity</h1>
-        <form id="searchForm">
-            <input type="text" id="termInput" placeholder="Enter scientific term..." required>
-            <button type="submit" class="btn-explain" id="btnText">Explain</button>
-        </form>
 
-        <div id="resultArea">
-            <h3 id="resTitle" style="color: #3498db; text-transform: uppercase;"></h3>
-            <div class="explanation-text" id="resDesc"></div>
-            
-            <div style="margin-top:25px; font-weight:bold; color: #2c3e50;">Related Terms:</div>
-            <div id="tagList" style="margin-bottom: 20px;"></div>
-            
-            <div style="margin-top:20px; font-size:12px; color:green; background:#e8f5e9; padding:10px; border-radius:8px; text-align:center; font-weight: bold;">
-                📦 Containerized with Docker
-            </div>
-
-            <div id="jsonBox">
-                <strong>[DEBUG] JSON RESPONSE:</strong>
-                <pre id="jsonRaw" style="white-space: pre-wrap; margin-top: 10px; font-family: monospace;"></pre>
-            </div>
-        </div>
+<div class="main-container">
+    <div class="history-sidebar">
+        <h3>Search History</h3>
+        <div id="hList"></div>
     </div>
 
-    <script>
-        document.getElementById('searchForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const termValue = document.getElementById('termInput').value;
-            const btn = document.getElementById('btnText');
-            
-            btn.innerText = "Processing...";
-            btn.disabled = true;
+    <div class="wrapper">
+        <div class="title">🔬 ConceptClarity</div>
+        <div class="search-box">
+            <input type="text" id="termInput" placeholder="Enter term...">
+            <button onclick="handleSearch()" id="btn">Explain</button>
+        </div>
 
-            try {
-                const response = await fetch('/search', { 
-                    method: 'POST', 
-                    body: new URLSearchParams({'term': termValue}) 
-                });
+        <div class="result-card" id="resCard">
+            <div class="term" id="resTerm"></div>
+            <div class="explanation" id="resDesc"></div>
+            <div id="resTags" class="tags"></div>
+        </div>
+
+        <div class="debug" id="debugWindow">
+            [DEBUG JSON]<br>
+            <pre id="jsonDisplay" style="white-space: pre-wrap;"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function handleSearch() {
+        const term = document.getElementById('termInput').value.trim();
+        if(!term) return;
+        const btn = document.getElementById('btn');
+        btn.innerText = "...";
+
+        try {
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ term: term })
+            });
+            const data = await response.json();
+
+            if (data.status === "success") {
+                document.getElementById('resCard').style.display = 'block';
+                document.getElementById('debugWindow').style.display = 'block';
+                document.getElementById('resTerm').innerText = data.term;
+                document.getElementById('resDesc').innerText = data.explanation;
                 
-                const data = await response.json();
+                const tagBox = document.getElementById('resTags');
+                tagBox.innerHTML = '';
+                data.related_terms.forEach(t => { tagBox.innerHTML += `<span class="tag">#${t}</span>`; });
 
-                if(data.status === 'success') {
-                    document.getElementById('resultArea').style.display = 'block';
-                    document.getElementById('resTitle').innerText = data.term;
-                    document.getElementById('resDesc').innerText = data.explanation;
-                    
-                    // Show JSON Debug Box
-                    document.getElementById('jsonBox').style.display = 'block';
-                    document.getElementById('jsonRaw').innerText = JSON.stringify(data, null, 2);
+                document.getElementById('jsonDisplay').innerText = JSON.stringify(data, null, 2);
+                updateHistoryUI(data.history);
+            } else { alert(data.message); }
+        } catch (err) { alert("Server Error!"); }
+        finally { btn.innerText = "Explain"; }
+    }
 
-                    const tagList = document.getElementById('tagList');
-                    tagList.innerHTML = '';
-                    data.related_terms.forEach(t => {
-                        tagList.innerHTML += `<span class="tag">${t}</span>`;
-                    });
-                }
-            } catch (err) {
-                alert("Server Connection Failed!");
-            } finally {
-                btn.innerText = "Explain";
-                btn.disabled = false;
-            }
-        };
-    </script>
+    function updateHistoryUI(history) {
+        const hList = document.getElementById('hList');
+        hList.innerHTML = history.map(item => `
+            <div class="h-item">
+                <span>${item}</span>
+                <span class="del-btn" onclick="deleteItem('${item}')">✕</span>
+            </div>
+        `).join('');
+    }
+
+    async function deleteItem(item) {
+        const response = await fetch('/delete_item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item: item })
+        });
+        const data = await response.json();
+        updateHistoryUI(data.history);
+    }
+</script>
 </body>
 </html>
