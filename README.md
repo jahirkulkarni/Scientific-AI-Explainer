@@ -1,15 +1,22 @@
-# 🔬 Scientific AI Explainer
-**Team C - Milestone 3 Project**
+🚀 ConceptClarity: Scientific AI Explainer
+ConceptClarity is a Flask-based web application designed to simplify complex scientific terms into easy-to-understand explanations in multiple languages (English, Hindi, and Marathi). By leveraging advanced AI models, it provides instant educational clarity for students and enthusiasts.
 
-This is an AI-powered web application that provides detailed scientific explanations for complex terms using the **GPT-2** model.
+✨ Features
+Multilingual Support: Get scientific explanations in English, Hindi, and Marathi.
 
-## 🚀 Features
-- **AI Definitions:** Generates 3-4 line explanations for scientific terms.
-- **Glass-morphism UI:** Modern and professional user interface.
-- **Flask Backend:** Robust integration between the AI model and web frontend.
+AI-Powered Engine: Utilizes Hugging Face Zephyr-7B and Llama-3.2 models for high-accuracy responses.
 
-## 🛠️ Tech Stack
-- **Language:** Python
-- **Framework:** Flask
-- **AI Model:** GPT-2 (HuggingFace Transformers)
-- **Deployment:** Ngrok Tunneling
+Search History: A dedicated sidebar saves and displays your recent search terms for quick reference.
+
+Modern UI: A sleek, dark-themed Glassmorphism design that is both responsive and user-friendly.
+
+Developer Debug Mode: Includes a live JSON window to monitor backend responses and model status.
+
+🛠️ Tech Stack
+Frontend: HTML5, CSS3 (Glassmorphism), JavaScript.
+
+Backend: Python, Flask.
+
+AI Integration: Hugging Face Inference API.
+
+Version Control: Git & GitHub.
