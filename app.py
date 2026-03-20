@@ -3,14 +3,14 @@ from transformers import pipeline
 
 app = Flask(__name__)
 
-# AI Model setup
+
 try:
     pipe = pipeline("text-generation", model="gpt2")
 except Exception as e:
     print(f"Model Error: {e}")
     pipe = None
 
-# Global history storage
+
 search_history = []
 
 @app.route('/')

@@ -21,14 +21,14 @@
         }
         button:hover { background: #27ae60; }
         
-        /* Professional Results View */
+        
         #resultBox { 
             text-align: left; margin-top: 30px; display: none; padding: 25px; 
             background: #fff; border: 1px solid #e1e8ed; border-left: 6px solid #3498db; border-radius: 10px;
         }
         #resText { line-height: 1.7; color: #444; font-size: 16px; }
 
-        /* Technical JSON View */
+        
         #jsonBox { 
             text-align: left; margin-top: 20px; display: none; padding: 20px; 
             background: #2c3e50; color: #ecf0f1; border-radius: 10px;
@@ -61,14 +61,14 @@
             e.preventDefault();
             const formData = new FormData(e.target);
             
-            // Show loading state (Optional)
+            
             document.getElementById('resultBox').style.display = 'none';
             document.getElementById('jsonBox').style.display = 'none';
 
             const response = await fetch('/search', { method: 'POST', body: formData });
             const data = await response.json();
 
-            // Render output
+            
             document.getElementById('resultBox').style.display = 'block';
             document.getElementById('resTerm').innerText = data.term;
             document.getElementById('resText').innerText = data.explanation;
